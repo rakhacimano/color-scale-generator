@@ -1,65 +1,280 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useColorState } from "@/hooks/use-color-state";
+import { PaletteDisplay } from "@/components/generator/palette-display";
+import { PreviewSection } from "@/components/generator/preview-section";
+import { ExportSection } from "@/components/generator/export-section";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Tabs } from "@/components/ui/tabs";
+import { Show, Hide, Send, InfoCircle } from "react-iconly";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { ColorPicker } from "@/components/ui/color-picker";
+
+function ColorGenerator() {
+  const { state, palette, updateState, mounted } = useColorState();
+  const [activeTab, setActiveTab] = useState("palette");
+  const [isDark, setIsDark] = useState(true);
+  const [navVisible, setNavVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  // Initialize dark mode on mount
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+
+  // Scroll-aware navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < 50) {
+        // Always show when near top
+        setNavVisible(true);
+      } else if (currentScrollY > lastScrollY.current) {
+        // Scrolling down - hide navbar
+        setNavVisible(false);
+      } else {
+        // Scrolling up - show navbar
+        setNavVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleRandom = () => {
+    const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+    updateState({ baseColor: randomColor });
+    toast.success("New palette generated!");
+  };
+
+  // Space key for random color
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && (e.target === document.body || e.target === document.documentElement)) {
+        e.preventDefault();
+        handleRandom();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [updateState, palette]);
+
+  if (!mounted) return null;
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Link copied to clipboard!");
+  };
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+    document.documentElement.classList.toggle('dark');
+  };
+
+  const tabs = [
+    { id: "palette", label: "Palette" },
+    { id: "preview", label: "Preview" },
+    { id: "export", label: "Export" },
+  ];
+
+  // Get a nice gradient from the palette
+  const gradientStart = palette?.light[3]?.hex || '#a855f7';
+  const gradientEnd = palette?.light[6]?.hex || '#ec4899';
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-500 flex flex-col">
+      {/* Gradient Background Orb */}
+      <div
+        className="fixed inset-0 pointer-events-none overflow-hidden"
+        style={{ zIndex: 0 }}
+      >
+        <motion.div
+          className="absolute -top-1/2 -right-1/2 w-[100vw] h-[100vw] rounded-full opacity-20 dark:opacity-10 blur-3xl"
+          style={{
+            background: `radial-gradient(circle, ${gradientStart} 0%, transparent 70%)`,
+          }}
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [0, 10, 0]
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+        <motion.div
+          className="absolute -bottom-1/2 -left-1/2 w-[100vw] h-[100vw] rounded-full opacity-20 dark:opacity-10 blur-3xl"
+          style={{
+            background: `radial-gradient(circle, ${gradientEnd} 0%, transparent 70%)`,
+          }}
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [0, -10, 0]
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
+
+      {/* Scroll-Aware Header */}
+      <motion.header
+        className="fixed w-full z-50 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl"
+        initial={{ y: 0 }}
+        animate={{ y: navVisible ? 0 : -80 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+      >
+        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            {/* Logo */}
+            <Link href="/">
+              <Image
+                src={isDark ? "/logocolorwhite.png" : "/logocolorblack.png"}
+                alt="Colowr"
+                width={120}
+                height={32}
+                className="h-7 w-auto"
+                priority
+              />
+            </Link>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1">
+            {/* Share Button */}
+
+            <Link
+              href="/oklch"
+              className="hidden sm:flex items-center gap-1.5 text-sm px-3 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+            >
+              What is OKLCH?
+            </Link>
+            <div className="w-px h-5 bg-zinc-200 dark:bg-zinc-800 mx-1" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleShare}
+              className="h-9 px-3 gap-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            >
+              <span className="hidden sm:inline text-sm">Share</span>
+            </Button>
+
+            <div className="w-px h-5 bg-zinc-200 dark:bg-zinc-800 mx-1" />
+
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              className="h-9 px-3 gap-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            >
+              <span className="hidden sm:inline text-sm">{isDark ? 'Light' : 'Dark'}</span>
+            </Button>
+          </div>
+        </div>
+      </motion.header>
+
+      {/* Spacer for fixed header */}
+      <div className="h-16" />
+
+      {/* Main Content */}
+      <main className="relative z-10 flex-1 container mx-auto px-6 py-12 space-y-12">
+        {/* Hero */}
+        <motion.div
+          className="text-center space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+            Generate beautiful color scales
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+          <p className="text-zinc-500 dark:text-zinc-400 max-w-lg mx-auto">
+            Create OKLCH-based color palettes optimized for both light and dark modes.
+            Press <kbd className="px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-xs font-mono">Space</kbd> for a random color.
+          </p>
+        </motion.div>
+
+        {/* Color Input Card */}
+        <motion.div
+          className="mx-auto w-full max-w-md"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl shadow-zinc-200/50 dark:shadow-black/20">
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                Base Color
+              </Label>
+              <ColorPicker
+                color={state.baseColor}
+                onChange={(color) => updateState({ baseColor: color })}
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Centered Tabs */}
+        <div className="flex justify-center">
+          <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
+        </div>
+
+        {/* Tab Content */}
+        <AnimatePresence mode="wait">
+          {activeTab === "palette" && (
+            <motion.div
+              key="palette"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              <PaletteDisplay palette={palette} />
+            </motion.div>
+          )}
+          {activeTab === "preview" && (
+            <motion.div
+              key="preview"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
             >
-              Learning
-            </a>{" "}
-            center.
+              <PreviewSection palette={palette} />
+            </motion.div>
+          )}
+          {activeTab === "export" && (
+            <motion.div
+              key="export"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <ExportSection palette={palette} prefix="primary" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      {/* Minimal Footer */}
+      <footer className="relative z-10 border-t border-zinc-200/50 dark:border-zinc-800/50 py-4">
+        <div className="container mx-auto px-6">
+          <p className="text-center text-base text-zinc-400 dark:text-zinc-500">
+            © 2026 Colowr • Made with ❤️ by <span className="font-medium text-zinc-600 dark:text-zinc-300">Cimano</span>
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </footer>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950" />}>
+      <ColorGenerator />
+    </Suspense>
   );
 }
