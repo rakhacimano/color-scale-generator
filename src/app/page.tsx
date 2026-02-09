@@ -166,14 +166,14 @@ function ColorGenerator() {
             <div className="w-px h-5 bg-zinc-200 dark:bg-zinc-800 mx-1" />
 
             {/* Theme Toggle */}
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
               className="h-9 px-3 gap-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             >
               <span className="hidden sm:inline text-sm">{isDark ? 'Light' : 'Dark'}</span>
-            </Button>
+            </Button> */}
           </div>
         </div>
       </motion.header>
