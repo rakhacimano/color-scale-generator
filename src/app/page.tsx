@@ -15,7 +15,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ColorPicker } from "@/components/ui/color-picker";
 import ShinyText from "@/components/ui/shiny-text";
-import LightRays from "@/components/ui/light-rays";
 
 function ColorGenerator() {
   const { state, palette, updateState, mounted } = useColorState();
@@ -94,9 +93,10 @@ function ColorGenerator() {
   const gradientEnd = palette?.light[6]?.hex || '#ec4899';
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-500 flex flex-col">
+    <div className="min-h-screen bg-transparent text-zinc-900 dark:text-zinc-100 transition-colors duration-500 flex flex-col">
       {/* Light Rays Background */}
-      <div
+      {/* Light Rays Background - Commented out to show GridPattern */}
+      {/* <div
         className="fixed inset-0 pointer-events-none overflow-hidden"
         style={{ zIndex: 0 }}
       >
@@ -105,9 +105,8 @@ function ColorGenerator() {
           speed={40}
           color={isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)"}
         />
-        {/* Subtle gradient overlay to soften edges */}
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-50/80 via-transparent to-zinc-50/80 dark:from-zinc-950/80 dark:via-transparent dark:to-zinc-950/80" />
-      </div>
+      </div> */}
 
       {/* Scroll-Aware Header */}
       <motion.header
@@ -151,7 +150,7 @@ function ColorGenerator() {
               <span className="hidden sm:inline text-sm">Share</span>
             </Button>
 
-            <div className="w-px h-5 bg-zinc-200 dark:bg-zinc-800 mx-1" />
+            {/* <div className="w-px h-5 bg-zinc-200 dark:bg-zinc-800 mx-1" /> */}
 
             {/* Theme Toggle */}
             {/* <Button

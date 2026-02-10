@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Sora } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import GridPattern from "@/components/ui/grid-pattern";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${sora.className} ${sora.variable} antialiased`}>
+        <GridPattern />
         {children}
         <Toaster />
       </body>
