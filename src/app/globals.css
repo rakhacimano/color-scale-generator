@@ -2,6 +2,17 @@
 
 @theme {
   --font-sans: var(--font-sora);
+  --animate-shine: shine 8s linear infinite;
+
+  @keyframes shine {
+    from {
+      background-position: 0 0;
+    }
+
+    to {
+      background-position: -200% 0;
+    }
+  }
 }
 
 :root {

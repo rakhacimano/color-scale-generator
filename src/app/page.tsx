@@ -14,6 +14,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ColorPicker } from "@/components/ui/color-picker";
+import ShinyText from "@/components/ui/shiny-text";
+import LightRays from "@/components/ui/light-rays";
 
 function ColorGenerator() {
   const { state, palette, updateState, mounted } = useColorState();
@@ -93,33 +95,18 @@ function ColorGenerator() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-500 flex flex-col">
-      {/* Gradient Background Orb */}
+      {/* Light Rays Background */}
       <div
         className="fixed inset-0 pointer-events-none overflow-hidden"
         style={{ zIndex: 0 }}
       >
-        <motion.div
-          className="absolute -top-1/2 -right-1/2 w-[100vw] h-[100vw] rounded-full opacity-20 dark:opacity-10 blur-3xl"
-          style={{
-            background: `radial-gradient(circle, ${gradientStart} 0%, transparent 70%)`,
-          }}
-          animate={{
-            scale: [1, 1.1, 1],
-            rotate: [0, 10, 0]
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        <div className="absolute inset-0 bg-white dark:bg-zinc-950" />
+        <LightRays
+          speed={40}
+          color={isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)"}
         />
-        <motion.div
-          className="absolute -bottom-1/2 -left-1/2 w-[100vw] h-[100vw] rounded-full opacity-20 dark:opacity-10 blur-3xl"
-          style={{
-            background: `radial-gradient(circle, ${gradientEnd} 0%, transparent 70%)`,
-          }}
-          animate={{
-            scale: [1, 1.1, 1],
-            rotate: [0, -10, 0]
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-        />
+        {/* Subtle gradient overlay to soften edges */}
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-50/80 via-transparent to-zinc-50/80 dark:from-zinc-950/80 dark:via-transparent dark:to-zinc-950/80" />
       </div>
 
       {/* Scroll-Aware Header */}
@@ -217,6 +204,7 @@ function ColorGenerator() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 container mx-auto px-6 py-12 space-y-12">
+
         {/* Hero */}
         <motion.div
           className="text-center space-y-4"
@@ -224,9 +212,9 @@ function ColorGenerator() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Generate beautiful color scales
-          </h1>
+          <div className="text-3xl md:text-4xl font-bold tracking-tight">
+            <ShinyText text="Generate beautiful color scales" speed={3} />
+          </div>
           <p className="text-zinc-500 dark:text-zinc-400 max-w-lg mx-auto">
             Create OKLCH-based color palettes optimized for both light and dark modes.
             Press <kbd className="px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-xs font-mono">Space</kbd> for a random color.
