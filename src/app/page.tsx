@@ -8,7 +8,7 @@ import { ExportSection } from "@/components/generator/export-section";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs } from "@/components/ui/tabs";
-import { Show, Hide, Send, InfoCircle } from "react-iconly";
+import { Show, Hide, Send, InfoCircle, Category } from "react-iconly";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -20,6 +20,7 @@ function ColorGenerator() {
   const [activeTab, setActiveTab] = useState("palette");
   const [isDark, setIsDark] = useState(true);
   const [navVisible, setNavVisible] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const lastScrollY = useRef(0);
 
   // Initialize dark mode on mount
@@ -174,8 +175,41 @@ function ColorGenerator() {
             >
               <span className="hidden sm:inline text-sm">{isDark ? 'Light' : 'Dark'}</span>
             </Button> */}
+
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="sm:hidden h-9 w-9 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 ml-1"
+            >
+              <Category set="bold" size={20} primaryColor="currentColor" />
+            </Button>
           </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="sm:hidden border-t border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 overflow-hidden"
+            >
+              <div className="p-4 space-y-2">
+                <Link
+                  href="/oklch"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                >
+                  <InfoCircle set="bold" size={20} primaryColor="currentColor" />
+                  <span className="font-medium">What is OKLCH?</span>
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.header>
 
       {/* Spacer for fixed header */}
@@ -260,7 +294,7 @@ function ColorGenerator() {
       </main>
 
       {/* Minimal Footer */}
-      <footer className="relative z-10 border-t border-zinc-200/50 dark:border-zinc-800/50 py-4">
+      <footer className="relative z-10 border-t border-zinc-200/50 dark:border-zinc-800/50 py-12">
         <div className="container mx-auto px-6">
           <p className="text-center text-base text-zinc-400 dark:text-zinc-500">
             © 2026 Colowr • Made with ❤️ by <span className="font-medium text-zinc-600 dark:text-zinc-300">Cimano</span>
