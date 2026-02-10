@@ -9,7 +9,7 @@ export interface GeneratorState {
 }
 
 const DEFAULT_STATE: GeneratorState = {
-    baseColor: '#3b82f6', // Blue 500
+    baseColor: '#8b5cf6', // Blue 500
 };
 
 export function useColorState() {
