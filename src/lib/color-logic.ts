@@ -18,6 +18,8 @@ export interface ColorToken {
     onColor: '#ffffff' | '#000000';
     contrastWhite: number;
     contrastBlack: number;
+    contrastRatio: number;
+    wcagLevel: 'AAA' | 'AA' | 'AA Large' | 'Fail';
 }
 
 export interface Palette {
@@ -70,8 +72,20 @@ export function getContrastStats(hexColor: string) {
     const black = '#000000';
     const contrastWhite = wcagContrast(hexColor, white);
     const contrastBlack = wcagContrast(hexColor, black);
+
+    const contrastRatio = contrastWhite >= contrastBlack ? contrastWhite : contrastBlack;
     const onColor = (contrastWhite >= contrastBlack ? white : black) as '#ffffff' | '#000000';
-    return { contrastWhite, contrastBlack, onColor };
+
+    let wcagLevel: 'AAA' | 'AA' | 'AA Large' | 'Fail' = 'Fail';
+    if (contrastRatio >= 7) {
+        wcagLevel = 'AAA';
+    } else if (contrastRatio >= 4.5) {
+        wcagLevel = 'AA';
+    } else if (contrastRatio >= 3) {
+        wcagLevel = 'AA Large';
+    }
+
+    return { contrastWhite, contrastBlack, onColor, contrastRatio, wcagLevel };
 }
 
 function interpolate(start: number, end: number, factor: number) {
