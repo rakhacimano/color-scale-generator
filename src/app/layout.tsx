@@ -3,6 +3,7 @@ import { Sora } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import GridPattern from "@/components/ui/grid-pattern";
+import { Analytics } from "@vercel/analytics/next";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -25,6 +26,7 @@ export default function RootLayout({
         <GridPattern />
         {children}
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );
